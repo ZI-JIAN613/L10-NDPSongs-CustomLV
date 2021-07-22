@@ -93,12 +93,10 @@ public class ThirdActivity extends AppCompatActivity {
         btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DBHelper dbh = new DBHelper(ThirdActivity.this);
-                int result = dbh.deleteSong(currentSong.getId());
+                DBHelper db = new DBHelper(ThirdActivity.this);
+                int result = db.deleteSong(currentSong.getId());
                 if (result>0){
                     Toast.makeText(ThirdActivity.this, "Song deleted", Toast.LENGTH_SHORT).show();
-                    Intent i = new Intent();
-                    setResult(RESULT_OK);
                     finish();
                 } else {
                     Toast.makeText(ThirdActivity.this, "Delete failed", Toast.LENGTH_SHORT).show();

@@ -7,6 +7,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -16,60 +17,67 @@ public class SecondActivity extends AppCompatActivity {
 
 	ListView lv;
     ArrayList<Song> songList;
-	ArrayAdapter adapter;
-	String moduleCode;
-	int requestCode = 9;
     Button btn5Stars;
+    CustomAdapter caNDP;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_second);
+    ArrayList<String> years;
+    Spinner spinner;
+    ArrayAdapter<String> spinnerAdapter;
 
-        setTitle(getTitle().toString() + " ~ " +  getResources().getText(R.string.title_activity_second));
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_second);
 
-		lv = (ListView) this.findViewById(R.id.lv);
+        setTitle(getTitle().toString() + " ~ " + getResources().getText(R.string.title_activity_second));
+
+        lv = (ListView) this.findViewById(R.id.lv);
         btn5Stars = (Button) this.findViewById(R.id.btnShow5Stars);
+        spinner = (Spinner) this.findViewById(R.id.spinner);
 
-		DBHelper dbh = new DBHelper(this);
-        songList = dbh.getAllSongs();
-        dbh.close();
+        DBHelper db = new DBHelper(this);
+        songList = db.getAllSongs();
+        years = db.getYear();
+        db.close();
 
-		adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, songList);
-		lv.setAdapter(adapter);
+        caNDP = new CustomAdapter(this, R.layout.row, songList);
+        lv.setAdapter(caNDP);
 
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent i = new Intent(SecondActivity.this, ThirdActivity.class);
                 i.putExtra("song", songList.get(position));
-                startActivityForResult(i, requestCode);
+                startActivity(i);
             }
         });
 
         btn5Stars.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DBHelper dbh = new DBHelper(SecondActivity.this);
+                DBHelper db = new DBHelper(SecondActivity.this);
                 songList.clear();
-                songList.addAll(dbh.getAllSongsByStars(5));
-                adapter.notifyDataSetChanged();
+                songList.addAll(db.getAllSongsByStars(5));
+                caNDP.notifyDataSetChanged();
+            }
+        });
+
+        spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, years);
+        spinner.setAdapter(spinnerAdapter);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                DBHelper db = new DBHelper(SecondActivity.this);
+                songList.clear();
+                songList.addAll(db.getAllSongsByYear(Integer.valueOf(years.get(position))));
+                caNDP.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
     }
-
-
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if(requestCode == this.requestCode && resultCode == RESULT_OK){
-			DBHelper dbh = new DBHelper(this);
-            songList.clear();
-            songList.addAll(dbh.getAllSongs());
-            dbh.close();
-            adapter.notifyDataSetChanged();
-		}
-		super.onActivityResult(requestCode, resultCode, data);
-	}
-
-
 }
