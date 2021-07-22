@@ -107,7 +107,8 @@ public class ThirdActivity extends AppCompatActivity {
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                Intent i = new Intent(ThirdActivity.this, MainActivity.class);
+                startActivity(i);
             }
         });
 
